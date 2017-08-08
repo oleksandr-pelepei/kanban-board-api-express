@@ -25,21 +25,30 @@ var schema = new Schema({
   }
 });
 
-// making password hash
+/**
+ * Mking password hash
+ */
 schema.pre('save', true, function(next, done) {
   var self = this;
 
   bcrypt.hash(self.password, salt, function(err, hash) {
     if (err) {
       return done(err);
-    } else {
-      self.password = hash;
-      return done();
-    }
+    } 
+
+    self.password = hash;
+    return done();
   });
 
   next();
 });
+
+/**
+ * Check user password
+ */
+schema.methods.checkPassword = function(password) {
+  return bcrypt.compareSync(password, this.password);
+};
 
 var model = mongoose.model('User', schema);
 
