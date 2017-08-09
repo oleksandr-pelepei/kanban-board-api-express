@@ -108,6 +108,11 @@ var router = express.Router();
  * @apiName PostUser
  * @apiGroup User
  * 
+ * @apiParam {String} first_name First name of the user
+ * @apiParam {String} last_name Last name of the user
+ * @apiParam {String} email User's email
+ * @apiParam {String} password User's password
+ * 
  * @apiUse SuchEmailIsAlreadyUsedError
  * @apiUse UserPasswordRequiredError
  * @apiUse SomeFieldIsNotCorrectError
@@ -155,6 +160,8 @@ router.route('/user/:id')
    * @apiName GetUser
    * @apiGroup User
    * 
+   * @apiParam {String} id 
+   * 
    * @apiPermission AuthorizationRequired
    * 
    * @apiUse NonAuthorizedError
@@ -179,6 +186,12 @@ router.route('/user/:id')
    * @api {put} /user/:id Modificate user data
    * @apiName PutUser
    * @apiGroup User
+   * 
+   * @apiParam {String} id 
+   * @apiParam {String} [first_name] First name of the user
+   * @apiParam {String} [last_name] Last name of the user
+   * @apiParam {String} [email] User's email
+   * @apiParam {String} [password] User's password
    * 
    * @apiPermission AuthorizationRequired
    * 
@@ -243,6 +256,8 @@ router.route('/user/:id')
    * @apiName DeleteUser
    * @apiGroup User
    * 
+   * @apiParam  {String} id 
+   * 
    * @apiPermission AuthorizationRequired
    * 
    * @apiUse NonAuthorizedError
@@ -275,9 +290,57 @@ router.route('/user/:id')
 
 /**
  * @api {get} /users/search/:searchString Search users by names and emails
+ * @apiName SearchUsers
+ * @apiGroup User
+ * 
+ * @apiParam {String} searchString Search string with name or email
+ * 
+ * @apiPermission AuthorizationRequired
+ * 
+ * @apiUse NonAuthorizedError
+ * 
+ * @apiSuccess (200) {Array} Array of users objects or empty array if nothing was found
  */
 router.get('/users/search/:searchString', function(req, res) {
-  
+  var searchString = req.params.searchString || '';
+
+	if (searchString != '') {
+		User
+			.find({
+				$or: [
+					{
+						first_name: {
+							$regex: searchString,
+							$options: 'i'
+						}
+					},
+					{
+						last_name: {
+							$regex: searchString,
+							$options: 'i'
+						}
+					},
+					{
+						email: {
+							$regex: searchString,
+							$options: 'i'
+						}
+					}
+				]
+			})
+			.select('-password')
+			.exec(function(err, users) {
+
+				if (err) {
+					res.json([]);
+				} else {
+					res.json(users);
+				}
+
+			});
+	} else {
+		res.json([]);
+	}
 });
 
 module.exports = router;
