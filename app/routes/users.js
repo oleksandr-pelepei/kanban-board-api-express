@@ -6,10 +6,114 @@ var bcryptOptions = require('../../config/development/').bcrypt;
 var User = require('../models/User');
 var router = express.Router();
 
-router.get('/users/search', function(req, res) {
-  res.send('works!');
-})
+/**
+ * @apiDefine SingleUserSuccessRes 
+ * @apiSuccess (200) {String} _id Id of the user
+ * @apiSuccess (200) {String} first_name First name of the user
+ * @apiSuccess (200) {String} last_name Last name of the user
+ * @apiSuccess (200) {String} email User's email
+ * 
+ * @apiSuccessExample {json} Success-Response:
+     HTTP/1.1 200 OK
+     {
+       "_id": "user_id",
+       "first_name": "First",
+       "last_name": "Last",
+       "email": "user.email@gmail.com"
+     }
+ */
 
+/** Permissions */
+
+/**
+ * @apiDefine AuthorizationRequired Require jwt authorization
+ * @apiHeader {String} Authorization JSON web token in format 'JWT token_here'
+ */
+
+
+/** Error blocks */
+
+/**
+ * @apiDefine NonAuthorizedError User has not added Jwt token to request or it's not correct
+ * @apiError NonAuthorized
+ * @apiErrorExample {json} Error-Response:
+     HTTP/1.1 401 Unauthorized
+ * 
+ */
+
+/**
+ * @apiDefine UserWasNotFoundError User with such parameters was not found
+ * @apiError UserWasNotFound
+ * @apiErrorExample {json} Error-Response:
+     HTTP/1.1 404 Not Found
+     {
+       "error": {
+         "message": "Error description"
+       }
+     }
+ */
+
+/**
+ * @apiDefine SuchEmailIsAlreadyUsedError User with such email already exists
+ * @apiError SuchEmailIsAlreadyUsed User with such email already exists
+ * @apiErrorExample {json} Error-Response:
+     HTTP/1.1 409 Conflict
+     {
+       "error": {
+         "message": "User with such email already exists."
+       }
+     }
+ * 
+ */
+
+/**
+ * @apiDefine UserPasswordRequiredError 
+ * @apiError UserPasswordRequired Password is required but was not defined
+ * @apiErrorExample {json} Error-Response:
+     HTTP/1.1 400 Bad request
+     {
+       "error": {
+         "message": "Password is required"
+       }
+     }
+ */
+
+/**
+ * @apiDefine SomeFieldIsNotCorrectError 
+ * @apiError SomeFieldIsNotCorrect Some of the fields are not correct or are missed
+ * @apiErrorExample {json} Error-Response:
+     HTTP/1.1 400 Bad request
+     {
+       "error": {
+         "message": "Description of error."
+       }
+     }
+ */
+
+/**
+ * @apiDefine UserCannotModificateError Only current user can modificate he's data
+ * @apiError UserCannotModificate
+ * @apiErrorExample {json} Error-Response:
+     HTTP/1.1 403 Forbidden
+     {
+       "error": {
+         "message": "You cannot modificate this user\'s data."
+       }
+     }
+ */
+
+
+/**
+ * @api {post} /user Create new user
+ * @apiName PostUser
+ * @apiGroup User
+ * 
+ * @apiUse SuchEmailIsAlreadyUsedError
+ * @apiUse UserPasswordRequiredError
+ * @apiUse SomeFieldIsNotCorrectError
+ * 
+ * @apiUse SingleUserSuccessRes
+ */
 router.post('/user', function(req, res) {
   if (!req.body.password) {
     return res.status(400).json({
@@ -45,6 +149,19 @@ router.post('/user', function(req, res) {
 router.use('/user/:id', passport.authenticate('jwt', { session: false }));
 
 router.route('/user/:id')
+
+  /**
+   * @api {get} /user/:id Return user data by it's <code>id<code>
+   * @apiName GetUser
+   * @apiGroup User
+   * 
+   * @apiPermission AuthorizationRequired
+   * 
+   * @apiUse NonAuthorizedError
+   * @apiUse UserWasNotFoundError
+   * 
+   * @apiUse SingleUserSuccessRes
+   */
   .get(function(req, res) {
     User.findById(req.params.id, function(err, user) {
       if (err || !user) {
@@ -57,11 +174,26 @@ router.route('/user/:id')
       res.json(user);
     });
   })
+  
+  /**
+   * @api {put} /user/:id Modificate user data
+   * @apiName PutUser
+   * @apiGroup User
+   * 
+   * @apiPermission AuthorizationRequired
+   * 
+   * @apiUse NonAuthorizedError
+   * @apiUse UserWasNotFoundError
+   * @apiUse UserCannotModificateError
+   * @apiUse SuchEmailIsAlreadyUsedError
+   * 
+   * @apiUse SingleUserSuccessRes
+   */
   .put(function(req, res) {
     if (req.user._id != req.params.id) {
       return res.status(403).json({
         error: {
-          message: 'You cannot modificate this user data.'
+          message: 'You cannot modificate this user\'s data.'
         }
       })
     }
@@ -84,6 +216,15 @@ router.route('/user/:id')
 
       user.save(function(err, updatedUser) {
         if (err) {
+          
+          if (err.code == 11000) {
+            return res.status(409).json({
+              error: {
+                message: "User with such email already exists."
+              }
+            });
+          }
+
           return res.json({
             error: {
               message: err.message
@@ -95,6 +236,20 @@ router.route('/user/:id')
       });
     });
   })
+
+  
+  /**
+   * @api {delete} /user/:id Completely delete user
+   * @apiName DeleteUser
+   * @apiGroup User
+   * 
+   * @apiPermission AuthorizationRequired
+   * 
+   * @apiUse NonAuthorizedError
+   * @apiUse UserCannotModificateError
+   * 
+   * @apiSuccess (200) {Object} Empty object
+   */
   .delete(function(req, res) {
     if (req.user._id != req.params.id) {
       return res.status(403).json({
@@ -116,5 +271,13 @@ router.route('/user/:id')
       res.json({});
     });
   });
+
+
+/**
+ * @api {get} /users/search/:searchString Search users by names and emails
+ */
+router.get('/users/search/:searchString', function(req, res) {
+  
+});
 
 module.exports = router;
