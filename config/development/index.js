@@ -9,6 +9,9 @@ var options = {
   jwt: {
     jwtFromRequest: ExtractJwt.fromAuthHeader(),
     secretOrKey: '*(&F_GBfg6767G&*N(gu'
+  },
+  bcrypt: {
+    saltRounds: 5
   }
 };
 

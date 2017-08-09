@@ -1,13 +1,26 @@
 var express = require('express');
-var router = express.Router();
 var passport = require('passport');
+var bcrypt = require('bcrypt');
+var bcryptOptions = require('../../config/development/').bcrypt;
+
 var User = require('../models/User');
+var router = express.Router();
 
 router.get('/users/search', function(req, res) {
   res.send('works!');
 })
 
 router.post('/user', function(req, res) {
+  if (!req.body.password) {
+    return res.status(400).json({
+      error: {
+        message: 'Password is required'
+      }
+    });
+  }
+
+  req.body.password = bcrypt.hashSync(req.body.password, bcryptOptions.saltRounds);
+
   User.create(req.body, function(err, user) {
     if (err) {
       if (err.code == 11000) {
@@ -53,6 +66,11 @@ router.route('/user/:id')
       })
     }
 
+    // if requst contain new password it makes hash before saving
+    if (req.body.password) {
+      req.body.password = bcrypt.hashSync(req.body.password, bcryptOptions.saltRounds);
+    }
+
     User.findById(req.params.id, function(err, user) {
       if (err || !user) {
         return res.status(404).json({
@@ -81,7 +99,7 @@ router.route('/user/:id')
     if (req.user._id != req.params.id) {
       return res.status(403).json({
         error: {
-          message: 'You cannot modificate this user data.'
+          message: 'You cannot modificate this user\'s data.'
         }
       })
     }
