@@ -8,7 +8,36 @@ var User = require('../models/User');
 
 var router = express.Router();
 
-// Signin route
+/**
+ * @api {post} /login JWT authorization
+ * 
+ * @apiParam  {String} email User email
+ * @apiParam  {String} password User password
+ * 
+ * @apiUse UserWasNotFoundError
+ * 
+ * @apiError IncorrectPassword 
+ * @apiErrorExample {json} Error-Response:
+     HTTP/1.1 200 OK
+     {
+       "error": {
+         "message": "Incorrect password."
+       }
+     }
+ *
+ * @apiError MissedEmailAnd/OrPassword
+ * @apiErrorExample {json} Error-Response:
+     HTTP/1.1 400 Bad Request
+     {
+       "error": {
+         "message": "Email and password is required"
+       }
+     }
+ *
+ * 
+ * @apiSuccess (200) {String} token Jwt token
+ * @apiSuccess (200) {Object} userData User data object
+ */
 router.post('/login', function(req, res) {
 	if (req.body.email && req.body.password) {
 		var email = req.body.email;
