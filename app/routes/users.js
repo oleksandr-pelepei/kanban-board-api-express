@@ -8,10 +8,10 @@ var router = express.Router();
 
 /**
  * @apiDefine SingleUserSuccessRes 
- * @apiSuccess (200) {String} _id Id of the user
- * @apiSuccess (200) {String} first_name First name of the user
- * @apiSuccess (200) {String} last_name Last name of the user
- * @apiSuccess (200) {String} email User's email
+ * @apiSuccess {String} _id Id of the user
+ * @apiSuccess {String} first_name First name of the user
+ * @apiSuccess {String} last_name Last name of the user
+ * @apiSuccess {String} email User's email
  * 
  * @apiSuccessExample {json} Success-Response:
      HTTP/1.1 200 OK
@@ -36,7 +36,7 @@ var router = express.Router();
 /**
  * @apiDefine NonAuthorizedError User has not added Jwt token to request or it's not correct
  * @apiError NonAuthorized
- * @apiErrorExample {json} Error-Response:
+ * @apiErrorExample {json} NonAuthorizedError-Response:
      HTTP/1.1 401 Unauthorized
  * 
  */
@@ -44,7 +44,7 @@ var router = express.Router();
 /**
  * @apiDefine UserWasNotFoundError User with such parameters was not found
  * @apiError UserWasNotFound
- * @apiErrorExample {json} Error-Response:
+ * @apiErrorExample {json} UserWasNotFoundError-Response:
      HTTP/1.1 404 Not Found
      {
        "error": {
@@ -56,7 +56,7 @@ var router = express.Router();
 /**
  * @apiDefine SuchEmailIsAlreadyUsedError User with such email already exists
  * @apiError SuchEmailIsAlreadyUsed User with such email already exists
- * @apiErrorExample {json} Error-Response:
+ * @apiErrorExample {json} SuchEmailIsAlreadyUsedError-Response:
      HTTP/1.1 409 Conflict
      {
        "error": {
@@ -69,7 +69,7 @@ var router = express.Router();
 /**
  * @apiDefine UserPasswordRequiredError 
  * @apiError UserPasswordRequired Password is required but was not defined
- * @apiErrorExample {json} Error-Response:
+ * @apiErrorExample {json} UserPasswordRequiredError-Response:
      HTTP/1.1 400 Bad request
      {
        "error": {
@@ -81,7 +81,7 @@ var router = express.Router();
 /**
  * @apiDefine SomeFieldIsNotCorrectError 
  * @apiError SomeFieldIsNotCorrect Some of the fields are not correct or are missed
- * @apiErrorExample {json} Error-Response:
+ * @apiErrorExample {json} SomeFieldIsNotCorrectError-Response:
      HTTP/1.1 400 Bad request
      {
        "error": {
@@ -93,7 +93,7 @@ var router = express.Router();
 /**
  * @apiDefine UserCannotModificateError Only current user can modificate he's data
  * @apiError UserCannotModificate
- * @apiErrorExample {json} Error-Response:
+ * @apiErrorExample {json} UserCannotModificateError-Response:
      HTTP/1.1 403 Forbidden
      {
        "error": {
@@ -151,18 +151,21 @@ router.post('/user', function(req, res) {
   });
 });
 
+// Authenticated user only can make next actions
 router.use('/user/:id', passport.authenticate('jwt', { session: false }));
 
 router.route('/user/:id')
 
   /**
-   * @api {get} /user/:id Return user data by it's <code>id<code>
+   * @api {get} /user/:id Get user data by id
    * @apiName GetUser
    * @apiGroup User
    * 
    * @apiParam {String} id 
    * 
    * @apiPermission AuthorizationRequired
+   * 
+   * @apiUse AuthorizationRequired
    * 
    * @apiUse NonAuthorizedError
    * @apiUse UserWasNotFoundError
@@ -194,6 +197,8 @@ router.route('/user/:id')
    * @apiParam {String} [password] User's password
    * 
    * @apiPermission AuthorizationRequired
+   * 
+   * @apiUse AuthorizationRequired
    * 
    * @apiUse NonAuthorizedError
    * @apiUse UserWasNotFoundError
@@ -260,10 +265,12 @@ router.route('/user/:id')
    * 
    * @apiPermission AuthorizationRequired
    * 
+   * @apiUse AuthorizationRequired
+   * 
    * @apiUse NonAuthorizedError
    * @apiUse UserCannotModificateError
    * 
-   * @apiSuccess (200) {Object} Empty object
+   * @apiSuccess {Object} empty Empty object
    */
   .delete(function(req, res) {
     if (req.user._id != req.params.id) {
@@ -297,9 +304,11 @@ router.route('/user/:id')
  * 
  * @apiPermission AuthorizationRequired
  * 
+ * @apiUse AuthorizationRequired
+ * 
  * @apiUse NonAuthorizedError
  * 
- * @apiSuccess (200) {Array} Array of users objects or empty array if nothing was found
+ * @apiSuccess {Object[]} users Array of users objects or empty array if nothing was found
  */
 router.get('/users/search/:searchString', function(req, res) {
   var searchString = req.params.searchString || '';
