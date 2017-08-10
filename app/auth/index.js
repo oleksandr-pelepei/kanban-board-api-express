@@ -10,6 +10,8 @@ var router = express.Router();
 
 /**
  * @api {post} /login JWT authorization
+ * @apiGroup Authorization
+ * @apiName JwtAuthorization
  * 
  * @apiParam  {String} email User email
  * @apiParam  {String} password User password
@@ -17,7 +19,7 @@ var router = express.Router();
  * @apiUse UserWasNotFoundError
  * 
  * @apiError IncorrectPassword 
- * @apiErrorExample {json} Error-Response:
+ * @apiErrorExample {json} IncorrectPassword:
      HTTP/1.1 200 OK
      {
        "error": {
@@ -26,7 +28,7 @@ var router = express.Router();
      }
  *
  * @apiError MissedEmailAnd/OrPassword
- * @apiErrorExample {json} Error-Response:
+ * @apiErrorExample {json} MissedEmailAnd/OrPassword:
      HTTP/1.1 400 Bad Request
      {
        "error": {
@@ -35,8 +37,19 @@ var router = express.Router();
      }
  *
  * 
- * @apiSuccess (200) {String} token Jwt token
- * @apiSuccess (200) {Object} userData User data object
+ * @apiSuccess {String} token Jwt token
+ * @apiSuccess {Object} userData User data object
+ * @apiSuccessExample {json} Success-Respond:
+     HTTP/1.1 200 OK
+     {
+       "token": "authorized_user_token",
+       "user": {
+         "_id": "343207hfdhs9832",
+         "first_name": "FIRST",
+         "last_name": "Last",
+         "email": "example@gamil.com"
+       }
+     }
  */
 router.post('/login', function(req, res) {
 	if (req.body.email && req.body.password) {
