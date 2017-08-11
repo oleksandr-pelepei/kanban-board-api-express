@@ -42,6 +42,18 @@ var router = express.Router();
  */
 
 /**
+ * @apiDefine UnpredictedError 
+ * @apiError Unpredicted
+ * @apiErrorExample {json} NonAuthorizedError-Response:
+     HTTP/1.1 200 OK
+     {
+       "error": {
+         "message": "Error description"
+       }
+     }
+ */
+
+/**
  * @apiDefine UserWasNotFoundError User with such parameters was not found
  * @apiError UserWasNotFound
  * @apiErrorExample {json} UserWasNotFoundError-Response:

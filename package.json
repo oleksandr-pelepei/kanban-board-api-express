@@ -13,11 +13,12 @@
     "body-parser": "^1.17.2",
     "express": "^4.15.4",
     "mongoose": "^4.11.5",
+    "multer": "^1.3.0",
     "passport": "^0.3.2",
     "passport-jwt": "^2.2.1"
   },
   "apidoc": {
     "title": "Kanban Board Api",
-    "url" : ""
+    "url": ""
   }
 }
