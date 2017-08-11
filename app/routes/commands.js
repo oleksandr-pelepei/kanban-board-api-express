@@ -128,7 +128,7 @@ router.post('/command', function(req, res) {
     }
 
     res.json(command);
-  })
+  });
 });
 
 router.route('/command/:id')
