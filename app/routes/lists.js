@@ -1,27 +1,23 @@
 var express = require('express');
-var router = express.Router();
 var List = require('../models/List');
+var passport = require('passport');
 
-router.get('/lists/:boardId', function(req, res) {
+var router = express.Router();
 
-});
+router.get('/lists/:boardId', passport.authenticate('jwt', { session: false }), function(req, res) {
+  List.find({
+    board: req.params.boardId
+  }, function(err, lists) {
+    if (err) {
+      res.json({
+        error: {
+          message: err.message
+        }
+      });
+    }
 
-router.post('/list', function(req, res) {
-
-});
-
-router.route('/list/:id')
-  .get(function(req, res) {
-
-  })
-  .put(function(req, res) {
-
-  })
-  .delete(function(req, res) {
-
+    res.json(lists);
   });
-
-  
-router.put('/list/:id/set-after/:prevListId');
+});
 
 module.exports = router;

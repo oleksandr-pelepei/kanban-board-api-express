@@ -77,7 +77,7 @@ router.post('/login', function(req, res) {
       var token = jwt.sign(payload, jwtOptions.secretOrKey);
 
       // Prevent sending password hash back
-      user.password = undefined;
+      user._password = undefined;
       
       res.json({token: token, user: user});	
 		});

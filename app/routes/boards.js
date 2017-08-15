@@ -4,6 +4,57 @@ var Board = require('../models/Board');
 
 var router = express.Router();
 
+/**
+ * Find all boards current user belongs to
+ * @api {get} /boards Search all user boards
+ * @apiName GetBoards
+ * @apiGroup Boards
+ * 
+ * @apiPermission AuthorizationRequired
+ * 
+ * @apiUse NonAuthorizedError
+ * 
+ * @apiSuccess (200) {Array} boards All user's boards
+ *  
+ * @apiSuccessExample {json} Success-Response:
+   HTTP/1.1 200 OK
+   [
+    {
+        "_id": "598d9a04ee9f8807e8ffeb0b",
+        "name": "Board 1",
+        "command": "598c31a46e550e230069ed0d",
+        "author": "598accadfbfaea2664e1600b",
+        "__v": 0,
+        "members": [
+            "598accc4fbfaea2664e1600c"
+        ],
+        "background": "#fff",
+        "privacy": "public"
+    },
+    {
+        "_id": "598d9a97ee9f8807e8ffeb0c",
+        "name": "Board 2",
+        "author": "598accc4fbfaea2664e1600c",
+        "__v": 0,
+        "members": [
+            "598accadfbfaea2664e1600b"
+        ],
+        "background": "#fff",
+        "privacy": "public"
+    },
+    {
+        "_id": "598d9c5eee9f8807e8ffeb0e",
+        "name": "Board 4",
+        "command": "598c31a46e550e230069ed0d",
+        "author": "598accc4fbfaea2664e1600c",
+        "__v": 0,
+        "members": [],
+        "background": "#fff",
+        "privacy": "public"
+    }
+  ]
+ * 
+ */
 router.get('/boards', passport.authenticate('jwt', { session: false }), function(req, res) {
   Board.findUserBoards(req.user, function(err, boards) {
     if (err) {
@@ -21,141 +72,5 @@ router.get('/boards', passport.authenticate('jwt', { session: false }), function
     res.json(boards);
   });
 });
-
-router.post('/board',  passport.authenticate('jwt', { session: false }), function(req, res) {
-  req.body.author = req.user._id;
-
-  Board.create(req.body, function(err, board) {
-    if (err) {
-      return res.json({
-        error: {
-          message: err.message
-        }
-      });
-    }
-
-    res.json(board);
-  });
-});
-
-router.route('/board/:id')
-  .all( passport.authenticate('jwt', { session: false }) )
-
-
-  .get(function(req, res) {
-    Board.findById(req.params.id, function(err, board) {
-      if (err) {
-        return res.json({
-          error: err.message
-        });
-      }
-
-      if (!board) {
-        return res.status(404).json({
-          error: "Such board was not found."
-        });
-      }
-
-      board.canUserRead(req.user).then(function(result) {
-        if (!result) {
-          return res.status(403).json({
-            error: {
-              message: "You have not access to this data."
-            }
-          });
-        }
-        
-        res.json(board);
-      });
-
-    });
-  })
-
-  .put(function(req, res) {
-    Board.findById(req.params.id, function(err, board) {
-      if (err) {
-        return res.json({
-          error: err.message
-        });
-      }
-
-      if (!board) {
-        return res.status(404).json({
-          error: {
-            message: "Such board was not found."
-          }
-        });
-      }
-
-      if ( !board.canUserModificate(req.user) ) {
-        return res.status(403).json({
-          error: {
-            message: "You are not allowed modificate this data."
-          }
-        });
-      }
-
-      for (var boardProp in req.body) {
-        // atuhor is defined only 1 time 
-        if (boardProp == 'author') {
-          return res.status(403).json({
-            error: {
-              message: "You are not allowed modificate this data."
-            }
-          });
-        }
-
-        board[boardProp] = req.body[boardProp];
-      }
-
-      board.save(function(err, updatedBoard) {
-        if (err) {
-          return res.json({
-            error: {
-              message: err.message
-            }
-          });
-        }
-
-        res.json(updatedBoard);
-      });
-    });
-  })
-
-  .delete(function(req, res) {
-    Board.findById(req.params.id, function(err, board) {
-      if (err) {
-        return res.json({
-          error: {
-            message: err.message
-          }
-        });
-      }
-      
-      if (!board) {
-        return res.json({});
-      }
-
-      if ( !board.canUserModificate(req.user) ) {
-        return res.status(403).json({
-          error: {
-            message: "You are not allowed modificate this data."
-          }
-        });
-      }
-
-      Board.deleteOne({_id: req.params.id}, function(err, operationRes) {
-        if (err) {
-          return res.json({
-            error: {
-              message: err.message
-            }
-          })
-        }
-
-        res.json({});
-      });
-    });
-  });
 
 module.exports = router;

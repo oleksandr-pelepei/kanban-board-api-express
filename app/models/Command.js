@@ -78,6 +78,16 @@ schema.methods.containUser = function(user) {
   return stringifyArrOfObjIds(this.members).indexOf(user._id) != -1;
 };
 
+schema.methods.canUserGet = 
+schema.methods.canUserPut = 
+schema.methods.canUserDelete = function(user) {
+  var _this = this;
+
+  return new Promise(function(res, rej) {
+    res( _this.isAuthor(user) || _this.containUser(user) );
+  });
+};
+
 /**
  * Add new user to command
  * @param {String} userId

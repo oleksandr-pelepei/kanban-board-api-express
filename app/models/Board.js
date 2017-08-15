@@ -106,17 +106,18 @@ schema.methods.isMember = function(user) {
  * @return {Promise} Promise with boolean resolve
  */
 schema.methods.isUserBoardCommandMemeber = function(user) {
+  var _this = this;
   return new Promise(function(res, rej) {
-    if (!this.command) {
+    if (!_this.command) {
         return res(false);
     }
 
-    Command.findById(this.command, function(err, command) {
+    Command.findById(_this.command, function(err, command) {
       if (err) {
         return rej(err);
       }
-      
-      return res( command.containUser(user) );
+
+      res( command.containUser(user) );
     });
   });
 };
@@ -130,42 +131,28 @@ schema.methods.isUserBoardCommandMemeber = function(user) {
  * @param {Object} user
  * @return {Promise} Promise with boolean resolve
  */
-schema.methods.canUserRead = function(user) {
-  var self = this; 
+schema.methods.canUserGet = function(user) {
+  var _this = this; 
 
   return new Promise(function(res, rej) {
-    switch (self.privacy) {
+    switch (_this.privacy) {
       case 'private':
-        if (self.isAuthor(user) || self.isMember(user)) {
-          res(true);
-        } else {
-          res(false);
-        }
-        
+        res(_this.isAuthor(user) || _this.isMember(user));        
         break;
     
       case 'command':
-
-        if (self.isAuthor(user) || self.isMember(user)) {
+        if (_this.isAuthor(user) || _this.isMember(user)) {
           res(true);
         } else {
-          self.isUserBoardCommandMemeber(user).then(function(result) {
-            if (result) {
-              res(true);
-            } else {
-              res(false);
-            }
-          });
+          _this.isUserBoardCommandMemeber(user).then(res);
         }
         break;
     
       case 'public':
-
         res(true);
         break;
     
       default:
-
         res(false);
         break;
     }
@@ -174,13 +161,17 @@ schema.methods.canUserRead = function(user) {
 
 /**
  * Check user permissions modificate data
- * Only author and board members cad do isAuthor
+ * Only author and board members can make
  * 
  * @param {Object} user
  * @return {Boolean} 
  */
-schema.methods.canUserModificate = function(user) {
-  return this.isAuthor(user) || this.isMember(user);
+schema.methods.canUserPut = 
+schema.methods.canUserDelete = function(user) {
+  var _this = this;
+  return new Promise(function(res, rej) {
+    res( _this.isAuthor(user) || _this.isMember(user) );
+  }); 
 };
 
 var model = mongoose.model('Board', schema);

@@ -1,8 +1,9 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var bcrypt = require('bcrypt');
+var bcryptOptions = require('../../config/development/').bcrypt;
 
-var schema = new Schema({
+var schema = Schema({
   first_name: {
     type: String,
     required: true,
@@ -25,11 +26,20 @@ var schema = new Schema({
       message: '{VALUE} is not a valid email.'
     }
   },
-  password: {
+  _password: {
     type: String,
     required: true
   }
 });
+
+schema.virtual('password')
+  .get(function() {
+    return this._password;
+  })
+  .set(function(val) {
+    this._password = bcrypt.hashSync(val, bcryptOptions.saltRounds);
+  });
+
 
 /**
  * Check user password
@@ -37,6 +47,16 @@ var schema = new Schema({
 schema.methods.checkPassword = function(password) {
   return bcrypt.compareSync(password, this.password);
 };
+
+/**
+ * 
+ */
+schema.methods.canUserPut = schema.methods.canUserDelete = function(user) {
+  var _this = this;
+  return new Promise(function(res, rej) {
+    res(_this._id == user._id)
+  });
+}
 
 var model = mongoose.model('User', schema);
 
