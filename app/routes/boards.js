@@ -73,4 +73,13 @@ router.get('/boards', passport.authenticate('jwt', { session: false }), function
   });
 });
 
+router.get('/board-tree/:id/', passport.authenticate('jwt', { session: false }), function(req, res) {
+  Board.findOne({
+    _id: req.params.id
+  })
+  .populate({
+    
+  })
+});
+
 module.exports = router;

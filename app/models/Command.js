@@ -3,13 +3,17 @@ var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
 var schema = new Schema({
-  author: ObjectId,
+  author: {
+    type: ObjectId,
+    ref: 'User'
+  },
   name: {
     type: String,
     required: true
   },
   members: {
-    type: [ObjectId]
+    type: [ObjectId],
+    ref: 'User'
   }
 });
 

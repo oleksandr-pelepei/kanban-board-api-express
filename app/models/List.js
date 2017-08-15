@@ -9,11 +9,13 @@ var Mixed = Schema.Types.Mixed;
 var schema = new Schema({
   author: {
     type: ObjectId,
-    required: true
+    required: true,
+    ref: 'User'
   },
   board: {
     type: ObjectId,
-    required: true
+    required: true,
+    ref: 'Board'
   },
   name: {
     type: String,
@@ -68,11 +70,6 @@ schema.methods.canUserPut = schema.methods.canUserDelete = function(user) {
       board.canUserPut(user).then(res);
     });
   });
-};
-
-
-schema.methods.changePos = function(newPosition) {
-  return chageDocPos(List, newPosition);
 };
 
 var model = mongoose.model('List', schema);

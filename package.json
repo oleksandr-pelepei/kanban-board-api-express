@@ -23,5 +23,8 @@
   "apidoc": {
     "title": "Kanban Board Api",
     "url": ""
+  },
+  "devDependencies": {
+    "chai-http": "^3.0.0"
   }
 }

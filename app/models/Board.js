@@ -11,7 +11,8 @@ var schema = new Schema({
   },
   author: {
     type: ObjectId,
-    required: true
+    required: true,
+    ref: 'User'
   },
   privacy: {
     type: String,
@@ -30,10 +31,12 @@ var schema = new Schema({
     default: '#fff'
   },
   members: {
-    type: [ObjectId]
+    type: [ObjectId],
+    ref: 'User'
   },
   command: {
-    type: ObjectId
+    type: ObjectId,
+    ref: 'Command'
   }
 });
 

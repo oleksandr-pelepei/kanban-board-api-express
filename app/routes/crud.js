@@ -17,7 +17,7 @@ router
     passport.authenticate('jwt', { session: false } )
   ),
   function(req, res, next) {
-    req.temp = {};
+    req.query = {};
     next();
   },
   findModel
@@ -40,7 +40,7 @@ function findModel(req, res, next) {
   }
 
   var Model = require(modelPath);
-  req.temp.Model = Model;
+  req.query.Model = Model;
 
   next();
 }
@@ -57,8 +57,8 @@ function checkIdParam(req, res, next) {
 function checkStaticPerm(req, res, next) {
   var permissionName = 'canUser' + capitalize.words(req.method.toLowerCase());
 
-  if (req.temp.Model[permissionName]) {
-    req.temp.Model[permissionName](req.user, req.body).then(function(access) {
+  if (req.query.Model[permissionName]) {
+    req.query.Model[permissionName](req.user, req.body).then(function(access) {
       if (!access) {
         return res.status(403).json({
           error: {
@@ -77,8 +77,8 @@ function checkStaticPerm(req, res, next) {
 function checkDocPerm(req, res, next) {
   var permissionName = 'canUser' + capitalize.words(req.method.toLowerCase());
 
-  if (req.temp.doc[permissionName]) {
-    req.temp.doc[permissionName](req.user).then(function(access) {
+  if (req.query.doc[permissionName]) {
+    req.query.doc[permissionName](req.user).then(function(access) {
       if (!access) {
         return res.status(403).json({
           error: {
@@ -95,11 +95,11 @@ function checkDocPerm(req, res, next) {
 }
 
 function createDoc(req, res, next) {
-  if (!!req.temp.Model.schema.paths.author && !req.body.author) {
+  if (!!req.query.Model.schema.paths.author && !req.body.author) {
     req.body.author = req.user._id;
   }
 
-  req.temp.Model.create(req.body, function(err, doc) {
+  req.query.Model.create(req.body, function(err, doc) {
     if (err) {
       return res.json({
         error: {
@@ -108,13 +108,13 @@ function createDoc(req, res, next) {
       });
     }
 
-    req.temp.doc = doc;
+    req.query.doc = doc;
     next();
   });
 }
 
 function updateDoc(req, res, next) {
-  var doc = req.temp.doc;
+  var doc = req.query.doc;
 
   for (var prop in req.body) {
     doc[prop] = req.body[prop];
@@ -129,13 +129,13 @@ function updateDoc(req, res, next) {
       });
     }
 
-    req.temp.doc = doc;
+    req.query.doc = doc;
     next();
   });
 }
 
 function findDoc(req, res, next) {
-  req.temp.Model.findById(req.params.docId, function(err, doc) {
+  req.query.Model.findById(req.params.docId, function(err, doc) {
     if (err) {
       return res.json({
         error: err.message
@@ -150,13 +150,13 @@ function findDoc(req, res, next) {
       });
     }
 
-    req.temp.doc = doc;
+    req.query.doc = doc;
     next();
   });
 }
 
 function deleteDoc(req, res, next) {
-  req.temp.Model.deleteOne({_id: req.params.docId}, function(err, operationRes) {
+  req.query.Model.deleteOne({_id: req.params.docId}, function(err, operationRes) {
     if (err) {
       return res.json({
         error: {
@@ -165,13 +165,13 @@ function deleteDoc(req, res, next) {
       })
     }
 
-    req.temp.doc = {};
+    req.query.doc = {};
     next();
   });
 }
 
 function sendDoc(req, res) {
-  res.json(req.temp.doc);
+  res.json(req.query.doc);
 }
 
 module.exports = router;

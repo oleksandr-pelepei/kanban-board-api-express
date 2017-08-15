@@ -46,10 +46,12 @@ var schema = new Schema({
   },
   author: {
     type: ObjectId,
-    required: true
+    required: true,
+    ref: 'User'
   },
   members: {
-    type: [ObjectId]
+    type: [ObjectId],
+    ref: 'User'
   },
   creating_date: {
     type: Date,
@@ -61,7 +63,8 @@ var schema = new Schema({
   },
   list: {
     type: ObjectId,
-    required: true
+    required: true,
+    ref: 'List'
   },
   position: {
     type: Number,
@@ -74,7 +77,8 @@ var schema = new Schema({
     type: [commentSchema]
   },
   attachments: {
-    type: [ObjectId]
+    type: [ObjectId],
+    ref: 'Attachment'
   }
 });
 
