@@ -1,6 +1,6 @@
 var passport = require('passport');
 var passportJWT = require('passport-jwt');
-var optJWT = require('../config/development/').jwt;
+var optJWT = require('../config/').jwt;
 
 var JwtStrategy = passportJWT.Strategy;
 

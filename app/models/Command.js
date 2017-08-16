@@ -78,7 +78,7 @@ schema.methods.isAuthor = function(user) {
  * Check whether user belongs this command
  * @param {Object} user
  */
-schema.methods.containUser = function(user) {
+schema.methods.hasUser = function(user) {
   return stringifyArrOfObjIds(this.members).indexOf(user._id) != -1;
 };
 
@@ -88,29 +88,9 @@ schema.methods.canUserDelete = function(user) {
   var _this = this;
 
   return new Promise(function(res, rej) {
-    res( _this.isAuthor(user) || _this.containUser(user) );
+    res( _this.isAuthor(user) || _this.hasUser(user) );
   });
 };
-
-/**
- * Add new user to command
- * @param {String} userId
- */
-schema.methods.addMember = function(userId) {
-  this.members.push(userId);
-}
-
-/**
- * Delete user from command
- * @param {String} userId
- */
-schema.methods.deleteMember = function(userId) {
-  var memberPosition = stringifyArrOfObjIds(this.members).indexOf(userId);
-
-  if (memberPosition != -1) {
-    this.members.splice(memberPosition, 1);
-  } 
-}
 
 var model = mongoose.model('Command', schema);
 
@@ -131,7 +111,7 @@ function stringifyArrOfObjIds(arr) {
 }
 
 /**
- * Check whether all memmbers of array are unique (doesnt work for objects)
+ * Check whether all memmbers of array are unique (doesn't work for objects)
  * 
  * @param {Array} arr 
  * @return {Boolean} Return false if array has to identic elements

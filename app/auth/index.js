@@ -2,7 +2,7 @@ var express = require('express');
 
 var passport = require('passport');
 var jwt = require('jsonwebtoken');
-var jwtOptions = require('../../config/development/').jwt;
+var jwtOptions = require('../../config/').jwt;
 
 var User = require('../models/User');
 

@@ -1,7 +1,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var bcrypt = require('bcrypt');
-var bcryptOptions = require('../../config/development/').bcrypt;
+var bcryptOptions = require('../../config/').bcrypt;
 
 var schema = Schema({
   first_name: {
@@ -48,9 +48,6 @@ schema.methods.checkPassword = function(password) {
   return bcrypt.compareSync(password, this.password);
 };
 
-/**
- * 
- */
 schema.methods.canUserPut = schema.methods.canUserDelete = function(user) {
   var _this = this;
   return new Promise(function(res, rej) {
