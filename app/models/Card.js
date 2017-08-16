@@ -49,10 +49,10 @@ var schema = new Schema({
     required: true,
     ref: 'User'
   },
-  members: {
-    type: [ObjectId],
+  members: [{
+    type: ObjectId,
     ref: 'User'
-  },
+  }],
   creating_date: {
     type: Date,
     required: true,
@@ -76,10 +76,10 @@ var schema = new Schema({
   comments: {
     type: [commentSchema]
   },
-  attachments: {
-    type: [ObjectId],
+  attachments: [{
+    type: ObjectId,
     ref: 'Attachment'
-  }
+  }]
 });
 
 schema.statics.canUserPost = function(user, data) {

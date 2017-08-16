@@ -30,10 +30,10 @@ var schema = new Schema({
     required: true,
     default: '#fff'
   },
-  members: {
-    type: [ObjectId],
+  members: [{
+    type: ObjectId,
     ref: 'User'
-  },
+  }],
   command: {
     type: ObjectId,
     ref: 'Command'

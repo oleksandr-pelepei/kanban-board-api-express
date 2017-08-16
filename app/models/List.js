@@ -1,6 +1,5 @@
 var mongoose = require('mongoose');
 var Board = require('./Board');
-var chageDocPos = require('../utils/change-doc-pos');
 
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;

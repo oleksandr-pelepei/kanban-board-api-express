@@ -11,10 +11,10 @@ var schema = new Schema({
     type: String,
     required: true
   },
-  members: {
-    type: [ObjectId],
+  members: [{
+    type: ObjectId,
     ref: 'User'
-  }
+  }]
 });
 
 /**

@@ -17,7 +17,7 @@ var storage = multer.diskStorage({
 var upload = multer({ storage: storage });
 
 router.use([
-  '/attachment',
+  '/attachment/',
   '/attachment/:id'
 ], passport.authenticate('jwt', { session: false }));
 
@@ -125,7 +125,7 @@ router.use([
  * @apiUse AttachmentSuccessCreatedRes
  * 
  */
-router.post('/attachment', upload.single('attachment'), function(req, res) {  
+router.post('/attachment/', upload.single('attachment'), function(req, res) {  
   if (!req.file) {
     return res.statusO(400).json({
       error: {

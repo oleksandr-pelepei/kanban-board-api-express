@@ -7,25 +7,32 @@ var path = require('path');
 
 var router = express.Router();
 
-router
-.route('/:modelName/(:docId/)?')
-.all( 
-  conditional(
-    function(req, res) {
-      return !(req.path == '/user/' && req.method == 'POST');
-    }, 
-    passport.authenticate('jwt', { session: false } )
-  ),
-  function(req, res, next) {
-    req.query = {};
-    next();
-  },
-  findModel
-)
-.get(checkIdParam, findDoc, checkDocPerm, sendDoc)
-.post(checkStaticPerm, createDoc, sendDoc)
-.put(checkIdParam, findDoc, checkDocPerm, updateDoc, sendDoc)
-.delete(checkIdParam, findDoc, checkDocPerm, deleteDoc, sendDoc);
+router.route('/:modelName/(:docId/)?')
+  .all( 
+    conditional(
+      function(req, res) {
+        return !(req.path == '/user/' && req.method == 'POST');
+      }, 
+      passport.authenticate('jwt', { session: false } )
+    ),
+    function(req, res, next) {
+      req.query = {};
+      next();
+    },
+    findModel
+  )
+  .get(checkIdParam, findDoc, checkDocPerm)
+  .post(checkStaticPerm, createDoc, sendDoc)
+  .put(checkIdParam, findDoc, checkDocPerm, updateDoc, sendDoc)
+  .delete(checkIdParam, findDoc, checkDocPerm, deleteDoc, sendDoc);
+
+router.get('/card/(:docId/)?', populateCard);
+
+router.route('/:modelName/(:docId/)?')
+  .get(sendDoc);
+  // .post(checkStaticPerm, createDoc, sendDoc)
+  // .put(checkIdParam, findDoc, checkDocPerm, updateDoc, sendDoc)
+  // .delete(checkIdParam, findDoc, checkDocPerm, deleteDoc, sendDoc);
 
 function findModel(req, res, next) {
   var modelName = capitalize.words(req.params.modelName);
@@ -173,5 +180,21 @@ function deleteDoc(req, res, next) {
 function sendDoc(req, res) {
   res.json(req.query.doc);
 }
+
+// Cards
+function populateCard(req, res, next) {
+  req.query.doc.populate('attachments', function(err, doc) {
+    if (err) {
+      res.json({
+        error: {
+          message: err.message
+        }
+      });
+    }
+    req.query.doc = doc;
+    next();
+  });
+}
+
 
 module.exports = router;
