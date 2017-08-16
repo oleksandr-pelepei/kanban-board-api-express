@@ -78,7 +78,7 @@ schema.methods.getListCards = function() {
     Card.find({
       list: _this._id
     })
-    .populate('attachments')
+    .populate('attachments members')
     .exec(function(err, cards) {
       if (err) {
         res([]);
