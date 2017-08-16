@@ -4,8 +4,15 @@ var passport = require('passport');
 var conditional = require('express-conditional-middleware');
 var fileExists = require('file-exists');
 var path = require('path');
+var async = require('async');
 
 var router = express.Router();
+
+router.get('/board/:docId/tree/', passport.authenticate('jwt', { session: false } ), 
+  setQuery, setModel('Board'), checkIdParam, findDoc, checkDocPerm, makeBoardTree, sendDoc);
+
+router.get('/card/:docId/', passport.authenticate('jwt', { session: false } ), 
+  setQuery, setModel('Card'), checkIdParam, findDoc, checkDocPerm, populateCard, sendDoc);
 
 router.route('/:modelName/(:docId/)?')
   .all( 
@@ -15,24 +22,28 @@ router.route('/:modelName/(:docId/)?')
       }, 
       passport.authenticate('jwt', { session: false } )
     ),
-    function(req, res, next) {
-      req.query = {};
-      next();
-    },
+    setQuery,
     findModel
   )
-  .get(checkIdParam, findDoc, checkDocPerm)
+  .get(checkIdParam, findDoc, checkDocPerm, sendDoc)
   .post(checkStaticPerm, createDoc, sendDoc)
   .put(checkIdParam, findDoc, checkDocPerm, updateDoc, sendDoc)
   .delete(checkIdParam, findDoc, checkDocPerm, deleteDoc, sendDoc);
 
-router.get('/card/(:docId/)?', populateCard);
 
-router.route('/:modelName/(:docId/)?')
-  .get(sendDoc);
-  // .post(checkStaticPerm, createDoc, sendDoc)
-  // .put(checkIdParam, findDoc, checkDocPerm, updateDoc, sendDoc)
-  // .delete(checkIdParam, findDoc, checkDocPerm, deleteDoc, sendDoc);
+function setQuery(req, res, next) {
+  req.query = {};
+  next();
+}
+
+function setModel(modelName) {
+  return function(req, res, next) {
+    var Model = require('../models/' + modelName);
+    req.query.Model = Model;
+
+    next();
+  }
+}
 
 function findModel(req, res, next) {
   var modelName = capitalize.words(req.params.modelName);
@@ -180,6 +191,24 @@ function deleteDoc(req, res, next) {
 function sendDoc(req, res) {
   res.json(req.query.doc);
 }
+
+// Boards
+function makeBoardTree(req, res, next) {
+  var board = req.query.doc;
+
+  board.getBoardLists().then(function(lists) {
+    async.map(lists, function(list, callback) {
+      list.getListCards().then(function(cards) {
+        list._doc.cards = cards;
+        callback(null, list)
+      });
+    }, function(err, lists) {
+      board._doc.lists = lists;
+      next();
+    });
+  });
+}
+
 
 // Cards
 function populateCard(req, res, next) {

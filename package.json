@@ -9,6 +9,7 @@
   "author": "Pelepey Oleksandr",
   "license": "MIT",
   "dependencies": {
+    "async": "^2.5.0",
     "bcrypt": "^1.0.2",
     "body-parser": "^1.17.2",
     "capitalize": "^1.0.0",

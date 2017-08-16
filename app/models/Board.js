@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var Command = require('./Command');
+var List = require('./List');
 
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
@@ -120,7 +121,22 @@ schema.methods.isUserBoardCommandMemeber = function(user) {
         return rej(err);
       }
 
-      res( command.containUser(user) );
+      res( command.hasUser(user) );
+    });
+  });
+};
+
+schema.methods.getBoardLists = function() {
+  var _this = this;
+  return new Promise(function(res, rej) {
+    List.find({
+      board: _this._id
+    }, function(err, lists) {
+      if (err || lists.length == 0) {
+        res([]);
+      } else {
+        res(lists)
+      }
     });
   });
 };
@@ -144,6 +160,7 @@ schema.methods.canUserGet = function(user) {
         break;
     
       case 'command':
+        console.log('board');
         if (_this.isAuthor(user) || _this.isMember(user)) {
           res(true);
         } else {

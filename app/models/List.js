@@ -1,9 +1,9 @@
 var mongoose = require('mongoose');
 var Board = require('./Board');
+var Card = require('./Card');
 
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
-var Mixed = Schema.Types.Mixed;
 
 var schema = new Schema({
   author: {
@@ -70,6 +70,24 @@ schema.methods.canUserPut = schema.methods.canUserDelete = function(user) {
     });
   });
 };
+
+schema.methods.getListCards = function() {
+  var _this = this;
+  
+  return new Promise(function(res, rej) {
+    Card.find({
+      list: _this._id
+    })
+    .populate('attachments')
+    .exec(function(err, cards) {
+      if (err) {
+        res([]);
+      } else {
+        res(cards);
+      }
+    });
+  });
+}
 
 var model = mongoose.model('List', schema);
 

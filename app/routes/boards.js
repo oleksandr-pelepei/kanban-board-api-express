@@ -1,5 +1,6 @@
 var express = require('express');
 var passport = require('passport');
+var async = require('async');
 var Board = require('../models/Board');
 
 var router = express.Router();
